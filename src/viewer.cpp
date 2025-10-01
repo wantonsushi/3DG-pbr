@@ -44,19 +44,6 @@ void Viewer::run() {
         glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        
-
-        /*
-        std::cout << "Camera position: "
-                  << camera.position.x() << ", "
-                  << camera.position.y() << ", "
-                  << camera.position.z() << " | "
-                  << "View dir: "
-                  << camera.view_dir.x() << ", "
-                  << camera.view_dir.y() << ", "
-                  << camera.view_dir.z() << std::endl;
-        */
-
         // call rasterize(camera) or raytrace(camera)
 
         glfwSwapBuffers(window);

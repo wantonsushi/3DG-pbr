@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(3DG-pbr)
+project(3DG-rt)
 
 set(CMAKE_CXX_COMPILER "/usr/bin/clang++" CACHE FILEPATH "C++ compiler" FORCE)
 set(CMAKE_C_COMPILER "/usr/bin/clang" CACHE FILEPATH "C compiler" FORCE)
@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Add Externals
 include_directories("extern/eigen")
 include_directories("extern/glfw")
+include_directories("extern/argparse/include")
 
 # Include folders
 include_directories(include)

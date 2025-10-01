@@ -1,6 +1,7 @@
 #pragma once
 
 #include "camera.h"
+#include "splat_scene.h"
 
 #include <GLFW/glfw3.h>
 #include <Eigen/Core>
@@ -15,12 +16,17 @@ public:
     void run();
     void shutdown();
 
+    void set_scene(std::shared_ptr<SplatScene> scene_ptr) {
+        scene = scene_ptr;
+    }
+
 private:
     GLFWwindow* window = nullptr;
     int width, height;
     std::string title;
 
-    Camera camera; // your camera class instance
+    Camera camera;
+    std::shared_ptr<SplatScene> scene; 
 
     // Input handling
     bool firstMouse = true;
