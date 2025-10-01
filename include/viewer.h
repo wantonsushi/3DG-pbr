@@ -28,6 +28,8 @@ private:
     Camera camera;
     std::shared_ptr<SplatScene> scene; 
 
+    bool rasterize = true;
+
     // Input handling
     bool firstMouse = true;
     double lastX = 0.0, lastY = 0.0;

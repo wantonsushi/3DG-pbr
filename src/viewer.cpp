@@ -44,7 +44,13 @@ void Viewer::run() {
         glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // call rasterize(camera) or raytrace(camera)
+        // make a frame using rasterize or raytrace
+        if(rasterize) {
+            // ...
+        }
+        else {
+            // ...
+        }
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -74,6 +80,9 @@ void Viewer::processInput(float deltaTime) {
 
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+        rasterize = !rasterize;
+    
 }
 
 void Viewer::mouse_callback(GLFWwindow* window, double xpos, double ypos) {
