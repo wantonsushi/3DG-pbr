@@ -22,9 +22,11 @@ add_executable(render ${SRC_FILES})
 
 # Use CMake's built-in OpenMP support
 find_package(OpenMP REQUIRED)
+
 if(OpenMP_CXX_FOUND)
-    message(STATUS "Found OpenMP: ${OpenMP_CXX_INCLUDE_DIRS}")
-    target_link_libraries(render PRIVATE OpenMP::OpenMP_CXX)
+    message(STATUS "Found OpenMP: ${OpenMP_CXX_LIBRARIES}")
+    target_compile_options(render PRIVATE ${OpenMP_CXX_FLAGS})
+    target_link_libraries(render PRIVATE ${OpenMP_CXX_LIBRARIES})
 endif()
 
 # Add GLFW and OpenGL linking

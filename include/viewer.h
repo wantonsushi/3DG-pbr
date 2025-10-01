@@ -9,7 +9,7 @@
 
 class Viewer {
 public:
-    Viewer(int width, int height, const std::string& title);
+    Viewer(int width, int height, const std::string& title, bool print_timings = true);
     ~Viewer();
 
     bool init();
@@ -29,6 +29,7 @@ private:
     std::shared_ptr<SplatScene> scene; 
 
     bool rasterize = true;
+    bool printFrameTimings = true;
 
     // Input handling
     bool firstMouse = true;

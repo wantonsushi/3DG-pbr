@@ -1,8 +1,9 @@
 #include "viewer.h"
 #include <iostream>
+#include <chrono>
 
-Viewer::Viewer(int w, int h, const std::string& t)
-    : width(w), height(h), title(t) {}
+Viewer::Viewer(int w, int h, const std::string& t, bool print_timings)
+    : width(w), height(h), title(t), printFrameTimings(print_timings) {}
 
 Viewer::~Viewer() {}
 
@@ -20,6 +21,7 @@ bool Viewer::init() {
     }
 
     glfwMakeContextCurrent(window);
+    //glfwSwapInterval(0);
     glfwSetWindowUserPointer(window, this);
     glfwSetCursorPosCallback(window, Viewer::mouse_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -34,10 +36,16 @@ bool Viewer::init() {
 void Viewer::run() {
     float lastFrame = 0.0f;
 
+    std::cout << "Rendering..." << std::endl;
+
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = float(glfwGetTime());
         float deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+
+        if (printFrameTimings) {
+            std::cout << "Frame time: " << deltaTime * 1000.0f << " ms" << std::endl;
+        }
 
         processInput(deltaTime);
 
