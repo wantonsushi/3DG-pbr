@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
         .required()
         .help("Input .ply scene file");
 
-    parser.add_argument("--print-frame-timings")
+    parser.add_argument("-p", "--print-timings")
         .default_value(true)
         .implicit_value(true)
         .help("Enable printing of per-frame timings (default: true)");
