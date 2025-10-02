@@ -31,6 +31,8 @@ private:
     bool rasterize = true;
     bool printFrameTimings = true;
 
+    bool r_pressed_last_frame = false;
+
     // Input handling
     bool firstMouse = true;
     double lastX = 0.0, lastY = 0.0;

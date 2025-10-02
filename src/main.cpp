@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
     }
 
     std::string ply_file = parser.get<std::string>("--input");
-    bool print_timings = parser.get<bool>("--print-frame-timings");
+    bool print_timings = parser.get<bool>("--print-timings");
 
     // =================================================================================
 
@@ -45,15 +45,15 @@ int main(int argc, char** argv) {
     }*/
 
     auto scene = make_shared<SplatScene>();
-    scene->reserve(10);
+    scene->reserve(1);
 
     std::mt19937 rng(42);
     std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
-    std::uniform_real_distribution<float> scale_dist(0.05f, 0.2f);
+    std::uniform_real_distribution<float> scale_dist(0.05f, 1.0f);
     std::uniform_real_distribution<float> opacity_dist(0.2f, 1.0f);
 
-    for (int i = 0; i < 10; i++) {
-        Eigen::Vector3f pos(dist(rng) * 2.0f, dist(rng) * 2.0f, -2.0f + dist(rng));
+    for (int i = 0; i < 1; i++) {
+        Eigen::Vector3f pos(dist(rng) * 2.0f, dist(rng) * 2.0f, dist(rng) * 2.0f + 0.5f);
         Eigen::Vector3f sc(scale_dist(rng), scale_dist(rng), scale_dist(rng));
         Eigen::Quaternionf rot = Eigen::Quaternionf::UnitRandom();
         float op = opacity_dist(rng);

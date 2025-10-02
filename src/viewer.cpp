@@ -2,6 +2,8 @@
 #include <iostream>
 #include <chrono>
 
+#include "rasterizer.h"
+
 Viewer::Viewer(int w, int h, const std::string& t, bool print_timings)
     : width(w), height(h), title(t), printFrameTimings(print_timings) {}
 
@@ -30,6 +32,8 @@ bool Viewer::init() {
     camera.set_perspective(45.0f, float(width) / float(height), 0.1f, 100.0f);
     camera.look_at({0, 0, 3}, {0, 0, 0}, {0, 1, 0});
 
+    glEnable(GL_DEPTH_TEST);
+
     return true;
 }
 
@@ -54,7 +58,13 @@ void Viewer::run() {
 
         // make a frame using rasterize or raytrace
         if(rasterize) {
-            // ...
+            glMatrixMode(GL_PROJECTION);
+            glLoadMatrixf(camera.projection_matrix().data());
+            glMatrixMode(GL_MODELVIEW);
+            glLoadMatrixf(camera.view_matrix().data());
+
+            static Rasterizer raster;
+            raster.draw_spheres();
         }
         else {
             // ...
@@ -88,8 +98,17 @@ void Viewer::processInput(float deltaTime) {
 
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+        
+    bool r_pressed = glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS;
+    if (r_pressed && !r_pressed_last_frame) {
         rasterize = !rasterize;
+        if (rasterize)
+            std::cout << "Switched to Rasterization mode." << std::endl;
+        else
+            std::cout << "Switched to Ray Tracing mode." << std::endl;
+    }
+    r_pressed_last_frame = r_pressed;
+        
     
 }
 
@@ -103,8 +122,8 @@ void Viewer::mouse_callback(GLFWwindow* window, double xpos, double ypos) {
         viewer->firstMouse = false;
     }
 
-    float xoffset = float(xpos - viewer->lastX);
-    float yoffset = float(viewer->lastY - ypos); // invert Y
+    float xoffset = float(viewer->lastX - xpos); // flip left/right
+    float yoffset = float(viewer->lastY - ypos); // keep Y inverted
     viewer->lastX = xpos;
     viewer->lastY = ypos;
 
