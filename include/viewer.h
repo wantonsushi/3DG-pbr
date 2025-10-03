@@ -18,6 +18,7 @@ public:
 
     void set_scene(std::shared_ptr<SplatScene> scene_ptr) {
         scene = scene_ptr;
+        scene->precompute();
     }
 
 private:

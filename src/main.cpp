@@ -33,8 +33,9 @@ int main(int argc, char** argv) {
 
     // =================================================================================
 
-    /*
+    
     // Load scene for rasterizing
+    /*
     shared_ptr<SplatScene> scene;
     try {
         scene = make_shared<SplatScene>(splat::PlyLoader::load(ply_file));
@@ -45,14 +46,14 @@ int main(int argc, char** argv) {
     }*/
 
     auto scene = make_shared<SplatScene>();
-    scene->reserve(1);
+    scene->reserve(100);
 
-    std::mt19937 rng(42);
+    std::mt19937 rng(0);
     std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
-    std::uniform_real_distribution<float> scale_dist(0.05f, 1.0f);
+    std::uniform_real_distribution<float> scale_dist(0.05f, 0.1f);
     std::uniform_real_distribution<float> opacity_dist(0.2f, 1.0f);
 
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 100; i++) {
         Eigen::Vector3f pos(dist(rng) * 2.0f, dist(rng) * 2.0f, dist(rng) * 2.0f + 0.5f);
         Eigen::Vector3f sc(scale_dist(rng), scale_dist(rng), scale_dist(rng));
         Eigen::Quaternionf rot = Eigen::Quaternionf::UnitRandom();
@@ -70,9 +71,6 @@ int main(int argc, char** argv) {
         scene->rotations.push_back(rot);
         scene->opacity.push_back(op);
         scene->sh_coeffs.push_back(sh);
-
-        scene->covariances.push_back(Eigen::Matrix3f::Identity() * sc.mean());
-        scene->bounding_radii.push_back(sc.norm());
     }
 
     std::cout << "Created fake scene with " << scene->size() << " splats.\n";

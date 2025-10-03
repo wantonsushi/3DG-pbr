@@ -24,6 +24,11 @@ bool Viewer::init() {
 
     glfwMakeContextCurrent(window);
     //glfwSwapInterval(0);
+
+    int framebufferWidth, framebufferHeight;
+    glfwGetFramebufferSize(window, &framebufferWidth, &framebufferHeight);
+    glViewport(0, 0, framebufferWidth, framebufferHeight);
+
     glfwSetWindowUserPointer(window, this);
     glfwSetCursorPosCallback(window, Viewer::mouse_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -34,6 +39,10 @@ bool Viewer::init() {
 
     glEnable(GL_DEPTH_TEST);
 
+    glfwSetFramebufferSizeCallback(window, [](GLFWwindow* window, int width, int height) {
+        glViewport(0, 0, width, height);
+    });
+
     return true;
 }
 
@@ -41,6 +50,9 @@ void Viewer::run() {
     float lastFrame = 0.0f;
 
     std::cout << "Rendering..." << std::endl;
+
+    static Rasterizer raster;
+    raster.setScene(scene.get());
 
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = float(glfwGetTime());
@@ -63,8 +75,8 @@ void Viewer::run() {
             glMatrixMode(GL_MODELVIEW);
             glLoadMatrixf(camera.view_matrix().data());
 
-            static Rasterizer raster;
-            raster.draw_spheres();
+            // render scene of Gaussians
+            raster.draw_splats();
         }
         else {
             // ...
@@ -92,9 +104,9 @@ void Viewer::processInput(float deltaTime) {
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.position += camera.right * velocity;
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-        camera.position += camera.up * velocity;
-    if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
         camera.position -= camera.up * velocity;
+    if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+        camera.position += camera.up * velocity;
 
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
@@ -122,8 +134,8 @@ void Viewer::mouse_callback(GLFWwindow* window, double xpos, double ypos) {
         viewer->firstMouse = false;
     }
 
-    float xoffset = float(viewer->lastX - xpos); // flip left/right
-    float yoffset = float(viewer->lastY - ypos); // keep Y inverted
+    float xoffset = float(viewer->lastX - xpos);  // flip left/right
+    float yoffset = float(ypos - viewer->lastY); // keep Y inverted
     viewer->lastX = xpos;
     viewer->lastY = ypos;
 

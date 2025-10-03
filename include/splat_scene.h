@@ -30,4 +30,22 @@ struct SplatScene {
         covariances.reserve(n);
         bounding_radii.reserve(n);
     }
+
+    // do precomputation
+    void precompute() {
+        size_t N = positions.size();
+        covariances.resize(N);
+        bounding_radii.resize(N);
+
+        for (size_t i = 0; i < N; ++i) {
+            Eigen::Matrix3f S = Eigen::Matrix3f::Identity();
+            S(0,0) = scales[i].x();
+            S(1,1) = scales[i].y();
+            S(2,2) = scales[i].z();
+
+            Eigen::Matrix3f R = rotations[i].normalized().toRotationMatrix();
+            Eigen::Matrix3f M = R * S;
+            covariances[i] = M * M.transpose();
+        }
+    }
 };
