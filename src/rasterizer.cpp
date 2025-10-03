@@ -4,12 +4,21 @@
 #include <cmath>
 #include <iostream>
 
-Rasterizer::Rasterizer()
+#include <omp.h>
+
+Rasterizer::Rasterizer(int w, int h)
 {
     glGenTextures(1, &fb_tex);
     glBindTexture(GL_TEXTURE_2D, fb_tex);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // allocate buffers once at construction
+    size_t pixels = size_t(w) * size_t(h);
+    out_color.resize(pixels * 3, 0.0f);
+    final_T.resize(pixels, 1.0f);
+    n_contrib.resize(pixels, 0);
+    invdepth.resize(pixels, 0.0f);
 }
 
 Rasterizer::~Rasterizer()
@@ -44,7 +53,7 @@ Eigen::Vector2f Rasterizer::worldToPixel(const Eigen::Vector3f& p_world, const E
     return { px, py };
 }
 
-// see https://github.com/graphdeco-inria/diff-gaussian-rasterization/blob/9c5c2028f6fbee2be239bc4c9421ff894fe4fbe0/cuda_rasterizer/forward.cu
+// EWA splatting
 Eigen::Matrix2f Rasterizer::computeCov2D(
     const Eigen::Vector3f& mean_world,
     const Eigen::Matrix3f& Sigma_world,
@@ -156,21 +165,14 @@ void Rasterizer::draw_splats()
     if (P == 0) return;
 
     // prep buffers
-    std::vector<float> out_color(W * H * 3, 0.0f);
-    std::vector<float> final_T(W * H, 1.0f);
-    std::vector<uint32_t> n_contrib(W * H, 0);
-    std::vector<float> invdepth(W * H, 0.0f);
-
-    struct GData {
-        Eigen::Matrix3f Sigma_world;
-        Eigen::Vector2f px;
-        float view_z; // for sorting (eye-space z)
-        Eigen::Vector3f rgb; // evaluated SH
-        float opacity;
-    };
+    std::fill(out_color.begin(), out_color.end(), 0.0f);
+    std::fill(final_T.begin(), final_T.end(), 1.0f);
+    std::fill(n_contrib.begin(), n_contrib.end(), 0);
+    std::fill(invdepth.begin(), invdepth.end(), 0.0f);
 
     std::vector<GData> gdat(P);
 
+    // #pragma omp parallel for schedule(static)
     for (size_t i = 0; i < P; ++i) {
         Eigen::Vector3f pos = scene->positions[i];
 
@@ -219,9 +221,15 @@ void Rasterizer::draw_splats()
         cov2D(1,1) += h_var;
 
         // determinant and inverse
-        float det = cov2D(0,0) * cov2D(1,1) - cov2D(0,1) * cov2D(1,0);
+        float a = cov2D(0,0), b = cov2D(0,1), c = cov2D(1,1);
+        float det = a * c - b * b;
         if (std::abs(det) < 1e-9f) continue;
-        Eigen::Matrix2f invCov = cov2D.inverse();
+        float invDet = 1.0f / det;
+        // inverse: 1/det * [ c  -b; -b  a ]
+        float i00 =  c * invDet;
+        float i01 = -b * invDet;
+        float i11 =  a * invDet;
+
 
         // compute eigen-based radius (3 sigma)
         float mid = 0.5f * (cov2D(0,0) + cov2D(1,1));
@@ -243,14 +251,12 @@ void Rasterizer::draw_splats()
                 float dx = (float(x) + 0.5f) - gd.px.x();
                 float dy = (float(y) + 0.5f) - gd.px.y();
 
-                float q = invCov(0,0) * dx*dx + 2.0f * invCov(0,1) * dx*dy + invCov(1,1) * dy*dy;
+                float q = i00 * dx*dx + 2.0f * i01 * dx*dy + i11 * dy*dy;
                 float power = -0.5f * q;
 
-                // skip if outside support
                 if (power < -30.0f) continue;
 
-                // compute alpha
-                float raw = std::exp(power);
+                float raw = expf(power);
                 float alpha = std::min(0.99f, gd.opacity * raw);
                 if (alpha < 1.0f / 255.0f) continue;
 

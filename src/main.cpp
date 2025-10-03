@@ -46,14 +46,14 @@ int main(int argc, char** argv) {
     }*/
 
     auto scene = make_shared<SplatScene>();
-    scene->reserve(100);
+    scene->reserve(250);
 
     std::mt19937 rng(0);
     std::uniform_real_distribution<float> dist(-1.0f, 1.0f);
     std::uniform_real_distribution<float> scale_dist(0.05f, 0.1f);
     std::uniform_real_distribution<float> opacity_dist(0.2f, 1.0f);
 
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 250; i++) {
         Eigen::Vector3f pos(dist(rng) * 2.0f, dist(rng) * 2.0f, dist(rng) * 2.0f + 0.5f);
         Eigen::Vector3f sc(scale_dist(rng), scale_dist(rng), scale_dist(rng));
         Eigen::Quaternionf rot = Eigen::Quaternionf::UnitRandom();

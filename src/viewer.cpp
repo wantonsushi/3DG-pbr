@@ -51,7 +51,7 @@ void Viewer::run() {
 
     std::cout << "Rendering..." << std::endl;
 
-    static Rasterizer raster;
+    static Rasterizer raster(width, height);
     raster.setScene(scene.get());
 
     while (!glfwWindowShouldClose(window)) {
