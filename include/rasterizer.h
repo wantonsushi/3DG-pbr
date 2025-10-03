@@ -42,9 +42,6 @@ private:
                                     int W, int H) const;
     Eigen::Matrix3f quatToRotation(const Eigen::Quaternionf& q) const;
 
-    // draw fullscreen quad with texture
-    void uploadAndDrawBuffer(int W, int H, const std::vector<float>& buffer);
-
     const SplatScene* scene = nullptr;
 
     // GL texture for final buffer

@@ -128,37 +128,6 @@ Eigen::Matrix3f Rasterizer::quatToRotation(const Eigen::Quaternionf& q_in) const
     return q.toRotationMatrix();
 }
 
-void Rasterizer::uploadAndDrawBuffer(int W, int H, const std::vector<float>& buffer)
-{
-    glBindTexture(GL_TEXTURE_2D, fb_tex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, W, H, 0, GL_RGB, GL_FLOAT, buffer.data());
-
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-
-    glDisable(GL_DEPTH_TEST);
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, fb_tex);
-
-    glBegin(GL_QUADS);
-    glTexCoord2f(0, 0); glVertex2f(-1, -1);
-    glTexCoord2f(1, 0); glVertex2f( 1, -1);
-    glTexCoord2f(1, 1); glVertex2f( 1,  1);
-    glTexCoord2f(0, 1); glVertex2f(-1,  1);
-    glEnd();
-
-    glDisable(GL_TEXTURE_2D);
-    glEnable(GL_DEPTH_TEST);
-
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-}
-
 void Rasterizer::draw_splats()
 {
     Eigen::Matrix4f proj = glGetFloatMatrix(GL_PROJECTION_MATRIX);
@@ -274,5 +243,5 @@ void Rasterizer::draw_splats()
         }
     }
 
-    uploadAndDrawBuffer(W, H, out_color);
+    uploadAndDrawBuffer(fb_tex, W, H, out_color);
 }

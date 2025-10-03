@@ -78,6 +78,6 @@ public:
         Eigen::Vector3f ray_dir = (view_dir
                                   + ndc_x * aspect * tanHalfFovy * right
                                   + ndc_y * tanHalfFovy * up).normalized();
-        return {position, ray_dir};
+        return Ray(position, ray_dir);
     }
 };

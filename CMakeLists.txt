@@ -20,13 +20,19 @@ file(GLOB SRC_FILES "src/*.cpp")
 
 add_executable(render ${SRC_FILES})
 
-# Use CMake's built-in OpenMP support
+# OpenMP
 find_package(OpenMP REQUIRED)
-
 if(OpenMP_CXX_FOUND)
-    message(STATUS "Found OpenMP: ${OpenMP_CXX_LIBRARIES}")
+    message(STATUS "Found OpenMP")
     target_compile_options(render PRIVATE ${OpenMP_CXX_FLAGS})
     target_link_libraries(render PRIVATE ${OpenMP_CXX_LIBRARIES})
+    # Fallback: for Clang, explicitly add -fopenmp if library variable is empty
+    if(NOT OpenMP_CXX_LIBRARIES)
+        target_compile_options(render PRIVATE -fopenmp)
+        target_link_libraries(render PRIVATE -fopenmp)
+    endif()
+else()
+    message(FATAL_ERROR "OpenMP not found! Install libomp-dev.")
 endif()
 
 # Add GLFW and OpenGL linking

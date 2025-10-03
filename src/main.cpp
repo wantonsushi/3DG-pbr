@@ -76,7 +76,8 @@ int main(int argc, char** argv) {
     std::cout << "Created fake scene with " << scene->size() << " splats.\n";
     // =================================================================================
 
-    Viewer viewer(1280, 720, "Renderer Viewer", print_timings);
+    //Viewer viewer(1280, 720, "Renderer Viewer", print_timings);
+    Viewer viewer(320, 240, "Renderer Viewer", print_timings);
     viewer.set_scene(scene);
 
     if (!viewer.init()) {

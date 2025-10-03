@@ -3,6 +3,7 @@
 #include <chrono>
 
 #include "rasterizer.h"
+#include "raytracer.h"
 
 Viewer::Viewer(int w, int h, const std::string& t, bool print_timings)
     : width(w), height(h), title(t), printFrameTimings(print_timings) {}
@@ -54,7 +55,12 @@ void Viewer::run() {
     static Rasterizer raster(width, height);
     raster.setScene(scene.get());
 
+    static RayTracer raytracer(width, height);
+    raytracer.setScene(scene.get());
+    raytracer.setCamera(&camera);
+
     while (!glfwWindowShouldClose(window)) {
+        static uint64_t fi = 0;
         float currentFrame = float(glfwGetTime());
         float deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -79,11 +85,13 @@ void Viewer::run() {
             raster.draw_splats();
         }
         else {
-            // ...
+            raytracer.render_frame(fi);
         }
 
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        fi++;
     }
 }
 

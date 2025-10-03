@@ -2,6 +2,9 @@
 
 #include <Eigen/Dense>
 
+#include <vector>
+#include <GL/gl.h>
+
 // sh constants
 constexpr float SH_C0      = 0.28209479177387814f;
 constexpr float SH_C1      = 0.4886025119029199f;
@@ -64,4 +67,38 @@ inline Eigen::Vector3f evalSH(
     result.array() += 0.5f;
 
     return result.cwiseMax(0.0f);
+}
+
+inline void uploadAndDrawBuffer(GLuint tex, int W, int H, const std::vector<float>& buffer)
+{
+    glBindTexture(GL_TEXTURE_2D, tex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, W, H, 0, GL_RGB, GL_FLOAT, buffer.data());
+
+    // Save previous matrices
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, tex);
+
+    glBegin(GL_QUADS);
+        glTexCoord2f(0, 0); glVertex2f(-1, -1);
+        glTexCoord2f(1, 0); glVertex2f( 1, -1);
+        glTexCoord2f(1, 1); glVertex2f( 1,  1);
+        glTexCoord2f(0, 1); glVertex2f(-1,  1);
+    glEnd();
+
+    glDisable(GL_TEXTURE_2D);
+    glEnable(GL_DEPTH_TEST);
+
+    // Restore matrices
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
 }
