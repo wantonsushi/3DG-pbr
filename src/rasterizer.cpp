@@ -6,7 +6,19 @@
 
 #include <omp.h>
 
-Rasterizer::Rasterizer(int w, int h)
+static constexpr int TILE = 16;
+
+struct Splat2D {
+    Eigen::Vector2f px;
+    float i00, i01, i11;   // inverse conic
+    float radius;
+    float view_z;
+    Eigen::Vector3f rgb;
+    float opacity;
+};
+
+Rasterizer::Rasterizer(int w, int h) :
+    W(w), H(h)
 {
     glGenTextures(1, &fb_tex);
     glBindTexture(GL_TEXTURE_2D, fb_tex);
@@ -149,12 +161,6 @@ void Rasterizer::uploadAndDrawBuffer(int W, int H, const std::vector<float>& buf
 
 void Rasterizer::draw_splats()
 {
-    // get viewport size
-    GLint vp[4];
-    glGetIntegerv(GL_VIEWPORT, vp);
-    int W = vp[2];
-    int H = vp[3];
-
     Eigen::Matrix4f proj = glGetFloatMatrix(GL_PROJECTION_MATRIX);
     Eigen::Matrix4f view = glGetFloatMatrix(GL_MODELVIEW_MATRIX);
 
@@ -177,18 +183,7 @@ void Rasterizer::draw_splats()
         Eigen::Vector3f pos = scene->positions[i];
 
         // get world covariance
-        Eigen::Matrix3f Sigma;
-        if (!scene->covariances.empty() && scene->covariances.size() == P) {
-            Sigma = scene->covariances[i];
-        } else {
-            Eigen::Matrix3f S = Eigen::Matrix3f::Identity();
-            S(0,0) = scene->scales[i].x();
-            S(1,1) = scene->scales[i].y();
-            S(2,2) = scene->scales[i].z();
-            Eigen::Matrix3f R = quatToRotation(scene->rotations[i]);
-            Eigen::Matrix3f M = R * S;
-            Sigma = M * M.transpose();
-        }
+        Eigen::Matrix3f Sigma = scene->covariances[i];
 
         Eigen::Vector2f px = worldToPixel(pos, proj, view, W, H);
 

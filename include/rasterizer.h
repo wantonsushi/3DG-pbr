@@ -33,6 +33,7 @@ public:
     // full splat pipeline
     void draw_splats();
 private:
+    int W, H;
     // Helpers
     Eigen::Matrix4f glGetFloatMatrix(GLenum pname) const;
     Eigen::Vector2f worldToPixel(const Eigen::Vector3f& p_world, const Eigen::Matrix4f& proj, const Eigen::Matrix4f& view, int W, int H) const;
